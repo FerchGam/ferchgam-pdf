@@ -19,8 +19,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
       - name: Descargar librerías (la app funciona sin internet)
         run: |
           L=app/src/main/assets/lib
