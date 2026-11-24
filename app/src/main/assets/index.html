@@ -317,15 +317,15 @@ footer b{font-family:Lexend,sans-serif}
 const ADS = { enabled: true, adsenseClient: "", adsenseSlot: "", admobBannerId: "" };
 
 const APP = { name: "FerchGam PDF", author: "FerchGam", version: "1.0" };
-const CDN = "https://cdnjs.cloudflare.com/ajax/libs/";
+const CDN = "https://cdn.jsdelivr.net/npm/";
 /* En la app de Android las librerías van dentro de la app (carpeta lib/); en la web se usan del CDN. */
 const IN_APP = location.protocol === "file:" || !!window.FGAndroid;
 const LIBSRC = {
-  pdfjs: ["pdf.min.js", CDN + "pdf.js/3.11.174/pdf.min.js"],
-  pdfjsWorker: ["pdf.worker.min.js", CDN + "pdf.js/3.11.174/pdf.worker.min.js"],
-  pdflib: ["pdf-lib.min.js", CDN + "pdf-lib/1.17.1/pdf-lib.min.js"],
-  jszip: ["jszip.min.js", CDN + "jszip/3.10.1/jszip.min.js"],
-  pptx: ["pptxgen.bundle.js", CDN + "pptxgenjs/3.12.0/pptxgen.bundle.js"]
+  pdfjs: ["pdf.min.js", CDN + "pdfjs-dist@3.11.174/build/pdf.min.js"],
+  pdfjsWorker: ["pdf.worker.min.js", CDN + "pdfjs-dist@3.11.174/build/pdf.worker.min.js"],
+  pdflib: ["pdf-lib.min.js", CDN + "pdf-lib@1.17.1/dist/pdf-lib.min.js"],
+  jszip: ["jszip.min.js", CDN + "jszip@3.10.1/dist/jszip.min.js"],
+  pptx: ["pptxgen.bundle.js", CDN + "pptxgenjs@3.12.0/dist/pptxgen.bundle.js"]
 };
 const LIB = Object.fromEntries(Object.keys(LIBSRC).map(k => [k, k]));
 
