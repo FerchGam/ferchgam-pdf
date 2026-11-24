@@ -1,0 +1,10 @@
+<resources>
+    <color name="rojo">#D93B2B</color>
+    <style name="Tema" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/rojo</item>
+        <item name="android:navigationBarColor">#1B1A19</item>
+        <item name="android:windowBackground">@color/rojo</item>
+        <item name="android:colorPrimary">@color/rojo</item>
+        <item name="android:colorAccent">#1F4FD8</item>
+    </style>
+</resources>

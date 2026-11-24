@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Hoja -->
+    <path android:fillColor="#FFFFFF" android:pathData="M36,28h26l12,12v40H36z" />
+    <path android:fillColor="#F2C9C3" android:pathData="M62,28v12h12z" />
+    <path android:fillColor="#F2C9C3" android:pathData="M42,44h18v3H42z M42,51h26v3H42z M42,58h22v3H42z" />
+    <!-- Firma -->
+    <path android:strokeColor="#1F4FD8" android:strokeWidth="2.6" android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M41,73c2,-7 4,-8 4,-5s-1,6 1,3 3,-7 5,-5 -2,5 1,4 3,-4 5,-2 1,3 3,2 4,-3 6,-1" />
+</vector>

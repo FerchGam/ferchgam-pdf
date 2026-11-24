@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="FerchGam">
+<title>FerchGam PDF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: amable, claro, accesible; letras grandes y botones grandes.
+   IDEA: una hoja de papel con la esquina doblada y una pluma que firma.
+   PICTURE: la hoja que se firma sola en la portada; cada herramienta es la propia hoja.
+   COLOUR and TYPE: rojo PDF dominante, tinta azul de pluma como acento, papel blanco; Lexend + Atkinson Hyperlegible (hecha para baja visión).
+   LAYOUT: una columna cómoda para el móvil, cuadrícula de herramientas grandes, pie con derechos de autor. */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#141210);--ink:light-dark(#1b1a19,#f3efe9);--soft:light-dark(#f5f2ed,#201d1a);
+--line:light-dark(#e3ded6,#38322d);--muted:light-dark(#5f5a54,#b4ada4);
+--red:light-dark(#d93b2b,#ff6a55);--redk:light-dark(#b02d20,#ff8a78);--blue:light-dark(#1f4fd8,#8ea8ff);--on:#fff}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-x:clip;min-height:100vh;display:flex;flex-direction:column}
+h1,h2,h3{font-family:Lexend,system-ui,sans-serif;line-height:1.08;margin:0;text-wrap:balance}
+h1{font-size:clamp(30px,7vw,46px)}h2{font-size:clamp(26px,5.5vw,34px)}h3{font-size:19px}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px max(4vw,14px);background:var(--red);color:var(--on)}
+.top a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px;font:700 20px Lexend,sans-serif}
+.top svg{width:34px;height:34px;flex:none}
+.top .back{margin-left:auto;background:rgba(255,255,255,.16);border:0;border-radius:12px;min-height:44px;padding:0 16px;font-weight:700;cursor:pointer;color:#fff}
+main{flex:1;width:100%;max-width:880px;margin:0 auto;padding:22px max(4vw,14px) 30px}
+.view{display:none;flex-direction:column;gap:18px}.view.on{display:flex}
+.lead{color:var(--muted);font-size:17px;max-width:60ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}
+.tile{display:flex;gap:14px;align-items:center;text-align:left;padding:18px;border-radius:20px;border:2px solid var(--line);background:var(--soft);cursor:pointer;min-height:96px;text-decoration:none;color:inherit;transition:transform .15s,border-color .15s}
+.tile:hover{border-color:var(--red);transform:translateY(-2px)}
+.tile .ic{flex:none;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:var(--red);color:#fff}
+.tile .ic svg{width:30px;height:30px}
+.tile b{display:block;font:700 19px Lexend,sans-serif}.tile span{color:var(--muted);font-size:15px}
+.tile.alt .ic{background:var(--blue)}
+.note{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--muted);background:var(--soft);border-radius:14px;padding:12px 14px}
+.card{border:2px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;border:3px dashed var(--line);border-radius:20px;padding:28px 16px;cursor:pointer;background:var(--soft);min-height:160px}
+.drop:hover,.drop.over{border-color:var(--red)}
+.drop svg{width:54px;height:54px;color:var(--red)}
+.drop b{font:700 20px Lexend,sans-serif}
+.file{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.file .nm{flex:1;font-weight:700;overflow-wrap:anywhere}
+.file small{display:block;color:var(--muted);font-weight:400}
+.sr{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:14px;border:0;background:var(--red);color:#fff;font:700 18px Lexend,sans-serif;cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--redk)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn.blue{background:var(--blue)}
+.btn.sm{min-height:44px;font-size:16px;padding:0 14px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.lbl{font-weight:700;font-size:16px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0}
+.seg span{display:flex;align-items:center;min-height:46px;padding:0 16px;border-radius:12px;border:2px solid var(--line);cursor:pointer;font-weight:700}
+.seg input:checked+span{border-color:var(--red);background:var(--red);color:#fff}
+.seg input:focus-visible+span{outline:3px solid var(--blue);outline-offset:2px}
+.txt{min-height:48px;border-radius:12px;border:2px solid var(--line);background:var(--bg);padding:0 14px;font-size:16px;width:100%}
+.chk{display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer}
+.chk input{width:24px;height:24px;accent-color:var(--red)}
+.bar{height:12px;border-radius:9px;background:var(--soft);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;width:0;background:var(--red);transition:width .2s}
+.prog{display:none;flex-direction:column;gap:6px}.prog.on{display:flex}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.thumb{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.thumb img{width:100%;border-radius:10px;border:1px solid var(--line);background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+.thumb small{text-align:center;color:var(--muted)}
+.sigs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sig{border:2px solid var(--line);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg);cursor:pointer;text-align:left}
+.sig .pv{height:72px;border-radius:10px;background:#fff;display:grid;place-items:center;padding:6px}
+.sig .pv img{max-width:100%;max-height:100%}
+.sig b{font-size:16px;overflow-wrap:anywhere}
+.sig.sel{border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 30%,transparent)}
+.pad{position:relative;height:220px;border-radius:16px;background:#fff;border:2px solid var(--line);touch-action:none;overflow:hidden}
+.pad canvas{position:absolute;inset:0;width:100%;height:100%}
+.pad .base{position:absolute;left:8%;right:8%;bottom:28%;border-top:2px dashed #c9c2b8;pointer-events:none}
+.pad .hint{position:absolute;left:8%;bottom:calc(28% + 6px);color:#a39b90;font-size:14px;pointer-events:none}
+.sw{width:44px;height:44px;border-radius:50%;border:3px solid var(--bg);box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.sw.on{box-shadow:0 0 0 3px var(--ink)}
+.sheetwrap{background:var(--soft);border-radius:18px;padding:12px;display:flex;justify-content:center}
+.sheet{position:relative;width:100%;max-width:640px;background:#fff;box-shadow:0 8px 28px rgba(0,0,0,.16);touch-action:manipulation;cursor:crosshair}
+.sheet canvas{display:block;width:100%;height:auto}
+.place{position:absolute;border:2px dashed transparent;touch-action:none;cursor:grab}
+.place img{display:block;width:100%;height:auto;pointer-events:none}
+.place.on{border-color:var(--blue);background:rgba(31,79,216,.06)}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pager b{font-size:16px}
+input[type=range]{width:100%;accent-color:var(--blue);height:32px}
+.empty{color:var(--muted);text-align:center;padding:16px;border:2px dashed var(--line);border-radius:16px}
+.about{display:grid;gap:18px}
+.about .hero{background:var(--red);color:#fff;border-radius:22px;padding:26px 22px;display:flex;flex-direction:column;gap:12px}
+.about .hero p{font-size:19px;max-width:52ch}
+.firma{font:600 clamp(44px,12vw,68px)/1 Caveat,cursive;color:var(--blue)}
+.about .hero .firma{color:#fff}
+.ad{max-width:880px;width:calc(100% - 2*max(4vw,14px));margin:0 auto 14px;border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--soft)}
+.ad small{font-size:13px;color:var(--muted)}
+.ad .slot{width:100%;max-width:468px;height:60px;border-radius:8px;display:grid;place-items:center;border:1px dashed var(--line);color:var(--muted);font-size:14px}
+footer{background:var(--ink);color:var(--bg);padding:18px max(4vw,14px);text-align:center;font-size:15px;display:flex;flex-direction:column;gap:2px}
+footer b{font-family:Lexend,sans-serif}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,140%);background:var(--ink);color:var(--bg);padding:14px 20px;border-radius:14px;font-weight:700;z-index:60;transition:transform .25s;max-width:calc(100% - 28px);text-align:center}
+.toast.on{transform:translate(-50%,0)}
+/* Portada animada */
+#splash{position:fixed;inset:0;z-index:100;background:var(--red);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center;transition:opacity .5s,visibility .5s;cursor:pointer}
+#splash.out{opacity:0;visibility:hidden}
+#splash svg{width:min(56vw,230px);height:auto;overflow:visible}
+#splash h1{font-size:clamp(38px,10vw,60px);opacity:0;transform:translateY(16px);animation:rise .6s .9s forwards}
+#splash p{font-size:19px;opacity:0;animation:rise .6s 1.3s forwards}
+#splash .by{font:600 30px Caveat,cursive;opacity:0;animation:rise .6s 1.6s forwards}
+.sp-page{animation:drop .7s cubic-bezier(.2,.9,.3,1.2) both}
+.sp-sign{stroke-dasharray:420;stroke-dashoffset:420;animation:sign 1.3s .55s ease-in-out forwards}
+.sp-pen{animation:pen 1.3s .55s ease-in-out forwards;transform-box:fill-box}
+@keyframes rise{to{opacity:1;transform:none}}
+@keyframes drop{from{transform:translateY(-30px) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes sign{to{stroke-dashoffset:0}}
+@keyframes pen{0%{transform:translate(0,0)}25%{transform:translate(38px,-10px)}50%{transform:translate(70px,6px)}75%{transform:translate(104px,-6px)}100%{transform:translate(132px,2px)}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0s!important;transition:none!important}.sp-sign{stroke-dashoffset:0}}
+@media(max-width:600px){.btn{width:100%}.row .btn.sm{width:auto}}
+</style>
+</head>
+<body>
+
+<div id="splash" role="dialog" aria-label="Bienvenida">
+  <svg viewBox="0 0 220 200" aria-hidden="true">
+    <g class="sp-page">
+      <path d="M40 10h100l40 40v140H40z" fill="#fff"/>
+      <path d="M140 10v40h40" fill="#f2c9c3"/>
+      <rect x="58" y="62" width="80" height="9" rx="4" fill="#f2c9c3"/>
+      <rect x="58" y="82" width="104" height="9" rx="4" fill="#f2c9c3"/>
+      <rect x="58" y="102" width="92" height="9" rx="4" fill="#f2c9c3"/>
+      <path d="M56 168h110" stroke="#e8b2aa" stroke-width="2" stroke-dasharray="4 4"/>
+    </g>
+    <path class="sp-sign" d="M58 158c8-26 14-30 16-18s-4 22 4 10 12-26 18-18-6 20 4 14 10-14 16-8 2 12 10 6 14-10 20-4 8 4 16-2" fill="none" stroke="#1f4fd8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g class="sp-pen">
+      <path d="M52 158l8-24 30-52 12 7-30 52z" fill="#1b1a19"/>
+      <path d="M52 158l8-24 9 5z" fill="#ffd8a8"/>
+      <path d="M90 82l12 7 6-10-12-7z" fill="#1f4fd8"/>
+    </g>
+  </svg>
+  <h1>FerchGam PDF</h1>
+  <p>Convierte y firma tus PDF, fácil y rápido</p>
+  <div class="by">por FerchGam</div>
+</div>
+
+<header class="top">
+  <a href="#inicio" aria-label="FerchGam PDF, inicio">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 3h17l8 8v26H8z" fill="#fff"/><path d="M25 3v8h8" fill="#f2c9c3"/><path d="M12 30c2-6 4-7 4-3s3-5 5-3 1 4 4 2 3-3 5-1" fill="none" stroke="#1f4fd8" stroke-width="2.4" stroke-linecap="round"/></svg>
+    FerchGam PDF
+  </a>
+  <button class="back" id="back" hidden>Volver</button>
+</header>
+
+<main>
+  <!-- INICIO -->
+  <section class="view" id="v-inicio" aria-labelledby="t-inicio">
+    <h1 id="t-inicio">¿Qué quieres hacer hoy?</h1>
+    <p class="lead">Elige una herramienta. Todo se hace dentro de tu teléfono: tus documentos no se suben a ningún sitio.</p>
+    <div class="grid" id="tiles"></div>
+  </section>
+
+  <!-- PNG -->
+  <section class="view" id="v-png">
+    <h2>PDF a imagen PNG</h2>
+    <p class="lead">Cada página se convierte en una imagen PNG.</p>
+    <div class="picker"></div>
+    <div class="card">
+      <div><div class="lbl">Calidad</div>
+        <div class="seg" role="radiogroup" aria-label="Calidad">
+          <label><input type="radio" name="pngq" value="1.5"><span>Normal</span></label>
+          <label><input type="radio" name="pngq" value="2.5" checked><span>Alta</span></label>
+          <label><input type="radio" name="pngq" value="4"><span>Máxima</span></label>
+        </div></div>
+      <label><span class="lbl">Páginas</span> <span class="lead">(déjalo vacío para todas, o escribe por ejemplo 1-3, 5)</span>
+        <input class="txt" id="png-range" inputmode="numeric" placeholder="Todas las páginas"></label>
+      <button class="btn" id="png-go">Convertir a PNG</button>
+      <div class="prog" id="png-prog"><div class="bar"><i></i></div><small></small></div>
+    </div>
+    <div id="png-out" class="card" hidden>
+      <div class="row"><h3 style="flex:1">Tus imágenes</h3><button class="btn sm" id="png-zip">Guardar todas (.zip)</button></div>
+      <div class="thumbs" id="png-thumbs"></div>
+    </div>
+  </section>
+
+  <!-- WORD -->
+  <section class="view" id="v-word">
+    <h2>PDF a Word</h2>
+    <p class="lead">Crea un archivo .docx que se abre en Word, Google Docs o WPS.</p>
+    <div class="picker"></div>
+    <div class="card">
+      <div><div class="lbl">¿Cómo lo quieres?</div>
+        <div class="seg" role="radiogroup" aria-label="Modo">
+          <label><input type="radio" name="wmode" value="img" checked><span>Igual al original</span></label>
+          <label><input type="radio" name="wmode" value="txt"><span>Texto para editar</span></label>
+        </div>
+        <p class="lead" id="wmode-help" style="font-size:15px;margin-top:6px"></p></div>
+      <label><span class="lbl">Páginas</span>
+        <input class="txt" id="word-range" inputmode="numeric" placeholder="Todas las páginas"></label>
+      <button class="btn" id="word-go">Convertir a Word</button>
+      <div class="prog" id="word-prog"><div class="bar"><i></i></div><small></small></div>
+    </div>
+  </section>
+
+  <!-- POWERPOINT -->
+  <section class="view" id="v-powerpoint">
+    <h2>PDF a PowerPoint</h2>
+    <p class="lead">Cada página se vuelve una diapositiva en un archivo .pptx.</p>
+    <div class="picker"></div>
+    <div class="card">
+      <div><div class="lbl">Calidad</div>
+        <div class="seg" role="radiogroup" aria-label="Calidad">
+          <label><input type="radio" name="pptq" value="1.5"><span>Ligera</span></label>
+          <label><input type="radio" name="pptq" value="2.2" checked><span>Alta</span></label>
+        </div></div>
+      <label class="chk"><input type="checkbox" id="ppt-notes" checked> Poner el texto de cada página en las notas</label>
+      <label><span class="lbl">Páginas</span>
+        <input class="txt" id="ppt-range" inputmode="numeric" placeholder="Todas las páginas"></label>
+      <button class="btn" id="ppt-go">Convertir a PowerPoint</button>
+      <div class="prog" id="ppt-prog"><div class="bar"><i></i></div><small></small></div>
+    </div>
+  </section>
+
+  <!-- FIRMAR -->
+  <section class="view" id="v-firmar">
+    <h2>Agregar firma</h2>
+    <p class="lead">1. Elige el PDF. 2. Elige una de tus firmas. 3. Toca la página donde va. Puedes poner varias firmas.</p>
+    <div class="picker"></div>
+    <div class="card">
+      <div class="row"><h3 style="flex:1">Tus firmas</h3><a class="btn sm ghost" href="#firmas">Crear o editar</a></div>
+      <div class="sigs" id="sign-sigs"></div>
+    </div>
+    <div class="card" id="sign-area" hidden>
+      <div class="pager">
+        <button class="btn sm ghost" id="pg-prev" aria-label="Página anterior">Anterior</button>
+        <b id="pg-lbl">Página 1 de 1</b>
+        <button class="btn sm ghost" id="pg-next" aria-label="Página siguiente">Siguiente</button>
+      </div>
+      <div class="sheetwrap"><div class="sheet" id="sheet"><canvas id="sheet-cv"></canvas></div></div>
+      <div id="place-ctl" hidden class="card" style="padding:14px">
+        <label><span class="lbl">Tamaño de la firma</span><input type="range" id="place-size" min="8" max="80" value="30"></label>
+        <div class="row"><button class="btn sm ghost" id="place-del">Quitar esta firma</button><span class="lead" style="font-size:15px">Arrastra la firma para moverla.</span></div>
+      </div>
+      <p class="lead" id="place-count" style="font-size:15px"></p>
+      <button class="btn blue" id="sign-go">Guardar PDF firmado</button>
+    </div>
+  </section>
+
+  <!-- MIS FIRMAS -->
+  <section class="view" id="v-firmas">
+    <h2>Mis firmas</h2>
+    <p class="lead">Dibuja tu firma con el dedo y ponle un nombre. Quedan guardadas en este teléfono.</p>
+    <div class="card">
+      <label><span class="lbl">Nombre de la firma</span><input class="txt" id="sig-name" maxlength="40" placeholder="Firma 1"></label>
+      <div class="pad" id="pad"><div class="base"></div><div class="hint">Firma aquí</div><canvas id="pad-cv"></canvas></div>
+      <div class="row" role="group" aria-label="Color de tinta" id="swatches"></div>
+      <label><span class="lbl">Grosor del trazo</span><input type="range" id="pad-w" min="2" max="9" value="4"></label>
+      <div class="row">
+        <button class="btn sm ghost" id="pad-undo">Deshacer</button>
+        <button class="btn sm ghost" id="pad-clear">Borrar</button>
+        <label class="btn sm ghost" style="cursor:pointer">Subir foto de firma<input type="file" accept="image/*" id="sig-up" class="sr"></label>
+      </div>
+      <button class="btn blue" id="sig-save">Guardar firma</button>
+    </div>
+    <div class="card">
+      <h3>Firmas guardadas</h3>
+      <div class="sigs" id="sig-list"></div>
+    </div>
+  </section>
+
+  <!-- ACERCA DE -->
+  <section class="view" id="v-acerca">
+    <div class="about">
+      <div class="hero">
+        <h2>Acerca de</h2>
+        <p>Hola, soy FerchGam. Soy una persona con discapacidad y creé esta aplicación con una idea muy clara: <b>algo sencillo para personas sencillas.</b></p>
+        <p>Quería una herramienta que cualquiera pudiera usar sin complicarse: botones grandes, pasos cortos y todo en español.</p>
+        <div class="firma">FerchGam</div>
+      </div>
+      <div class="card">
+        <h3>Lo que puedes hacer</h3>
+        <p>Convertir PDF a PNG, a Word y a PowerPoint, guardar tus firmas con nombre y firmar tus documentos con tu propia mano.</p>
+        <h3>Tu privacidad</h3>
+        <p>Tus documentos y tus firmas se procesan y se guardan solo en tu teléfono. No se envían a ningún servidor.</p>
+        <h3>Versión</h3>
+        <p>FerchGam PDF 1.0 · © <span class="yr"></span> FerchGam. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<aside class="ad" id="ad" aria-label="Publicidad">
+  <small>Publicidad</small>
+  <div class="slot" id="ad-slot">Espacio para anuncio</div>
+</aside>
+
+<footer>
+  <span>© <span class="yr"></span> <b>FerchGam PDF</b>. Todos los derechos reservados.</span>
+  <span>Creado por <b>FerchGam</b></span>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+{
+/* ===== Configuración de publicidad =====
+   Cuando tengas tus códigos, rellénalos aquí.
+   - Web: Google AdSense (adsenseClient = "ca-pub-...", adsenseSlot = "123...")
+   - Play Store: AdMob en la app nativa (admobBannerId = "ca-app-pub-.../...")  */
+const ADS = { enabled: true, adsenseClient: "", adsenseSlot: "", admobBannerId: "" };
+
+const APP = { name: "FerchGam PDF", author: "FerchGam", version: "1.0" };
+const CDN = "https://cdnjs.cloudflare.com/ajax/libs/";
+/* En la app de Android las librerías van dentro de la app (carpeta lib/); en la web se usan del CDN. */
+const IN_APP = location.protocol === "file:" || !!window.FGAndroid;
+const LIBSRC = {
+  pdfjs: ["pdf.min.js", CDN + "pdf.js/3.11.174/pdf.min.js"],
+  pdfjsWorker: ["pdf.worker.min.js", CDN + "pdf.js/3.11.174/pdf.worker.min.js"],
+  pdflib: ["pdf-lib.min.js", CDN + "pdf-lib/1.17.1/pdf-lib.min.js"],
+  jszip: ["jszip.min.js", CDN + "jszip/3.10.1/jszip.min.js"],
+  pptx: ["pptxgen.bundle.js", CDN + "pptxgenjs/3.12.0/pptxgen.bundle.js"]
+};
+const LIB = Object.fromEntries(Object.keys(LIBSRC).map(k => [k, k]));
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const xmlEsc = s => esc(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+$$(".yr").forEach(e => e.textContent = new Date().getFullYear());
+
+/* ---------- Avisos ---------- */
+let toastT;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 3200);
+}
+
+/* ---------- Portada ---------- */
+const splash = $("#splash");
+const hideSplash = () => splash.classList.add("out");
+splash.addEventListener("click", hideSplash);
+setTimeout(hideSplash, 3000);
+
+/* ---------- Carga de librerías ---------- */
+const loaded = {};
+const tag = src => new Promise((res, rej) => {
+  const s = document.createElement("script"); s.src = src;
+  s.onload = () => res(src); s.onerror = () => { s.remove(); rej(); };
+  document.head.appendChild(s);
+});
+function loadScript(key) {
+  if (!loaded[key]) loaded[key] = (async () => {
+    const [file, cdn] = LIBSRC[key];
+    if (IN_APP) { try { return await tag("lib/" + file); } catch (e) {} }
+    try { return await tag(cdn); }
+    catch (e) { delete loaded[key]; throw new Error("No se pudo cargar una herramienta. Revisa tu conexión a internet."); }
+  })();
+  return loaded[key];
+}
+async function needPdfjs() {
+  await loadScript(LIB.pdfjs); const w = await loadScript(LIB.pdfjsWorker);
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = w;
+}
+
+/* ---------- Guardar archivos ---------- */
+const dlReady = (async () => {
+  try { if (typeof window.claude?.use === "function") return await window.claude.use("downloads"); } catch (e) {}
+  return null;
+})();
+const MIME = { png: "image/png", zip: "application/zip", pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation" };
+const toB64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = rej; r.readAsDataURL(blob); });
+function savedSheet(name) {
+  const t = $("#toast"); clearTimeout(toastT);
+  t.innerHTML = `<div>Guardado en Descargas › FerchGam PDF</div><small style="font-weight:400">${esc(name)}</small>
+    <div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm blue" data-a="open">Abrir</button><button class="btn sm ghost" style="color:inherit;border-color:currentColor" data-a="share">Compartir</button></div>`;
+  t.style.pointerEvents = "auto"; t.classList.add("on");
+  t.querySelector("[data-a=open]").onclick = () => window.FGAndroid.openLast();
+  t.querySelector("[data-a=share]").onclick = () => window.FGAndroid.shareLast();
+  toastT = setTimeout(() => t.classList.remove("on"), 8000);
+}
+async function saveFile(name, blob) {
+  if (window.FGAndroid) {
+    try {
+      const ext = name.split(".").pop().toLowerCase();
+      const r = window.FGAndroid.saveFile(name, await toB64(blob), MIME[ext] || "application/octet-stream");
+      if (r === "ok") savedSheet(name); else toast("No se pudo guardar: " + r);
+    } catch (e) { toast("No se pudo guardar el archivo"); }
+    return;
+  }
+  const d = await dlReady;
+  if (d) {
+    try { await d.save({ filename: name, data: blob }); toast("Guardado: " + name); return; }
+    catch (e) {
+      if (e && e.code === "declined") { toast("Descarga cancelada"); return; }
+      if (e && e.code === "rate_limited") { toast("Espera un momento e inténtalo otra vez"); return; }
+    }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  toast("Descargando " + name);
+}
+
+/* ---------- Documento PDF actual ---------- */
+let pdf = null, bytes = null, fileName = "";
+async function openPdf(file) {
+  if (!file) return;
+  if (!/pdf$/i.test(file.type) && !/\.pdf$/i.test(file.name)) { toast("Ese archivo no es un PDF"); return; }
+  toast("Abriendo " + file.name + "…");
+  try {
+    bytes = new Uint8Array(await file.arrayBuffer());
+    await needPdfjs();
+    pdf = await window.pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+    fileName = file.name.replace(/\.pdf$/i, "") || "documento";
+    placements = []; signPage = 1;
+    toast("Listo: " + pdf.numPages + (pdf.numPages === 1 ? " página" : " páginas"));
+  } catch (e) {
+    pdf = null; bytes = null;
+    toast(e && e.name === "PasswordException" ? "Este PDF tiene contraseña. Quítasela primero." : (e.message || "No se pudo abrir el PDF"));
+  }
+  renderPickers(); if (current === "firmar") showSign();
+}
+function renderPickers() {
+  $$(".picker").forEach(p => {
+    p.innerHTML = pdf
+      ? `<div class="card"><div class="file"><svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><path d="M8 3h17l8 8v26H8z" fill="var(--red)"/><path d="M25 3v8h8" fill="#f2c9c3"/></svg>
+         <div class="nm">${esc(fileName)}.pdf<small>${pdf.numPages} ${pdf.numPages === 1 ? "página" : "páginas"}</small></div>
+         <label class="btn sm ghost" style="cursor:pointer">Cambiar PDF<input type="file" accept="application/pdf,.pdf" class="sr pdfin"></label></div></div>`
+      : `<label class="drop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M12 17v-6M9 13l3-3 3 3"/></svg>
+         <b>Elegir PDF</b><span class="lead">Toca aquí o arrastra tu archivo</span><input type="file" accept="application/pdf,.pdf" class="sr pdfin"></label>`;
+  });
+}
+document.addEventListener("change", e => { if (e.target.matches(".pdfin")) openPdf(e.target.files[0]); });
+/* Android: "Abrir con FerchGam PDF" desde otra app */
+window.FGOpenPdf = (name, b64) => {
+  const bin = atob(b64), arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  hideSplash(); openPdf(new File([arr], name || "documento.pdf", { type: "application/pdf" }));
+};
+document.addEventListener("dragover", e => { const d = e.target.closest?.(".drop"); if (d) { e.preventDefault(); d.classList.add("over"); } });
+document.addEventListener("dragleave", e => { const d = e.target.closest?.(".drop"); if (d) d.classList.remove("over"); });
+document.addEventListener("drop", e => { const d = e.target.closest?.(".drop"); if (d) { e.preventDefault(); openPdf(e.dataTransfer.files[0]); } });
+
+function parseRange(str, max) {
+  const s = (str || "").trim(); if (!s) return Array.from({ length: max }, (_, i) => i + 1);
+  const out = new Set();
+  for (const part of s.split(/[,;\s]+/)) {
+    const m = part.match(/^(\d+)(?:-(\d+))?$/); if (!m) continue;
+    let a = +m[1], b = m[2] ? +m[2] : a; if (a > b) [a, b] = [b, a];
+    for (let i = Math.max(1, a); i <= Math.min(max, b); i++) out.add(i);
+  }
+  return [...out].sort((x, y) => x - y);
+}
+async function renderPage(n, scale) {
+  const page = await pdf.getPage(n);
+  const vp = page.getViewport({ scale });
+  const cv = document.createElement("canvas");
+  cv.width = Math.floor(vp.width); cv.height = Math.floor(vp.height);
+  const ctx = cv.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  const base = page.getViewport({ scale: 1 });
+  return { cv, wPt: base.width, hPt: base.height, page };
+}
+async function pageText(page) {
+  const tc = await page.getTextContent();
+  const items = tc.items.filter(i => i.str && i.str.trim() !== "" || i.hasEOL);
+  const lines = []; let cur = null, lastY = null, lastEnd = 0;
+  for (const it of items) {
+    if (!it.str) continue;
+    const y = it.transform[5], x = it.transform[4], h = Math.abs(it.transform[3]) || it.height || 10;
+    if (cur === null || Math.abs(y - lastY) > h * 0.6) { if (cur !== null) lines.push(cur); cur = it.str; }
+    else cur += (x - lastEnd > h * 0.15 ? " " : "") + it.str;
+    lastY = y; lastEnd = x + (it.width || 0);
+  }
+  if (cur !== null) lines.push(cur);
+  return lines.map(l => l.replace(/\s+/g, " ").trim()).filter(Boolean);
+}
+const toBlob = (cv, type, q) => new Promise(r => cv.toBlob(r, type, q));
+function progress(id, done, total) {
+  const p = $(id); p.classList.add("on");
+  p.querySelector("i").style.width = (total ? done / total * 100 : 0) + "%";
+  p.querySelector("small").textContent = done < total ? `Página ${done + 1} de ${total}…` : "¡Terminado!";
+}
+const needDoc = () => { if (!pdf) { toast("Primero elige un PDF"); return false; } return true; };
+const busy = (btn, on) => { btn.disabled = on; };
+
+/* ---------- PDF a PNG ---------- */
+let pngs = [];
+$("#png-go").addEventListener("click", async e => {
+  if (!needDoc()) return; const btn = e.currentTarget; busy(btn, true);
+  try {
+    const scale = +document.querySelector("input[name=pngq]:checked").value;
+    const pages = parseRange($("#png-range").value, pdf.numPages);
+    if (!pages.length) { toast("Revisa los números de página"); return; }
+    pngs.forEach(p => URL.revokeObjectURL(p.url)); pngs = [];
+    const box = $("#png-thumbs"); box.innerHTML = ""; $("#png-out").hidden = false;
+    for (let i = 0; i < pages.length; i++) {
+      progress("#png-prog", i, pages.length);
+      const { cv } = await renderPage(pages[i], scale);
+      const blob = await toBlob(cv, "image/png"); cv.width = cv.height = 0;
+      const item = { n: pages[i], blob, url: URL.createObjectURL(blob), name: `${fileName}_pagina_${pages[i]}.png` };
+      pngs.push(item);
+      const d = document.createElement("div"); d.className = "thumb";
+      d.innerHTML = `<img alt="Página ${item.n}" src="${item.url}"><small>Página ${item.n}</small><button class="btn sm">Guardar</button>`;
+      d.querySelector("button").addEventListener("click", () => saveFile(item.name, item.blob));
+      box.appendChild(d);
+      await sleep(0);
+    }
+    progress("#png-prog", pages.length, pages.length);
+    if (pngs.length === 1) saveFile(pngs[0].name, pngs[0].blob);
+  } catch (err) { toast(err.message || "Algo salió mal"); }
+  finally { busy(btn, false); }
+});
+$("#png-zip").addEventListener("click", async () => {
+  if (!pngs.length) return;
+  try {
+    await loadScript(LIB.jszip); const zip = new window.JSZip();
+    pngs.forEach(p => zip.file(p.name, p.blob));
+    saveFile(fileName + "_imagenes.zip", await zip.generateAsync({ type: "blob" }));
+  } catch (err) { toast(err.message || "No se pudo crear el ZIP"); }
+});
+
+/* ---------- PDF a Word ---------- */
+const wHelp = { img: "Cada página queda exactamente igual, como imagen dentro de Word.", txt: "Se copia solo el texto para que lo puedas cambiar. Las imágenes y el diseño no se copian. No funciona con PDF escaneados." };
+const setWHelp = () => $("#wmode-help").textContent = wHelp[document.querySelector("input[name=wmode]:checked").value];
+$$("input[name=wmode]").forEach(r => r.addEventListener("change", setWHelp)); setWHelp();
+
+function docxXml(body, sect) {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>${body}${sect}</w:body></w:document>`;
+}
+async function buildDocx(bodyXml, sectXml, images) {
+  await loadScript(LIB.jszip); const zip = new window.JSZip();
+  zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="jpeg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/></Types>`);
+  zip.file("_rels/.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`);
+  zip.file("docProps/core.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${xmlEsc(fileName)}</dc:title><dc:creator>${APP.name}</dc:creator></cp:coreProperties>`);
+  const rels = images.map((im, i) => `<Relationship Id="rImg${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image${i + 1}.jpeg"/>`).join("");
+  zip.file("word/_rels/document.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels}</Relationships>`);
+  images.forEach((im, i) => zip.file(`word/media/image${i + 1}.jpeg`, im));
+  zip.file("word/document.xml", docxXml(bodyXml, sectXml));
+  return zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+}
+function imgPara(i, cx, cy, brk) {
+  return `<w:p><w:pPr>${brk ? "<w:pageBreakBefore/>" : ""}<w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${i}" name="Pagina ${i}"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="${i}" name="pagina${i}.jpeg"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rImg${i}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
+}
+const txtPara = (t, brk) => `<w:p><w:pPr>${brk ? "<w:pageBreakBefore/>" : ""}<w:spacing w:after="80"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/></w:rPr><w:t xml:space="preserve">${xmlEsc(t)}</w:t></w:r></w:p>`;
+
+$("#word-go").addEventListener("click", async e => {
+  if (!needDoc()) return; const btn = e.currentTarget; busy(btn, true);
+  try {
+    const mode = document.querySelector("input[name=wmode]:checked").value;
+    const pages = parseRange($("#word-range").value, pdf.numPages);
+    if (!pages.length) { toast("Revisa los números de página"); return; }
+    let body = "", images = [], sect = "", emptyText = true;
+    for (let i = 0; i < pages.length; i++) {
+      progress("#word-prog", i, pages.length);
+      if (mode === "img") {
+        const { cv, wPt, hPt } = await renderPage(pages[i], 2);
+        const blob = await toBlob(cv, "image/jpeg", 0.92); cv.width = cv.height = 0;
+        images.push(new Uint8Array(await blob.arrayBuffer()));
+        if (i === 0) sect = `<w:sectPr><w:pgSz w:w="${Math.round(wPt * 20)}" w:h="${Math.round(hPt * 20)}"/><w:pgMar w:top="0" w:right="0" w:bottom="0" w:left="0" w:header="0" w:footer="0" w:gutter="0"/></w:sectPr>`;
+        body += imgPara(i + 1, Math.round(wPt * 12700 * 0.985), Math.round(hPt * 12700 * 0.985), i > 0);
+      } else {
+        const page = await pdf.getPage(pages[i]);
+        const lines = await pageText(page);
+        if (lines.length) emptyText = false;
+        body += (lines.length ? lines : [""]).map((l, k) => txtPara(l, i > 0 && k === 0)).join("");
+      }
+      await sleep(0);
+    }
+    if (mode === "txt") {
+      if (emptyText) { toast("Este PDF no tiene texto (puede ser escaneado). Usa «Igual al original»."); $("#word-prog").classList.remove("on"); return; }
+      sect = `<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr>`;
+    }
+    const blob = await buildDocx(body, sect, images);
+    progress("#word-prog", pages.length, pages.length);
+    saveFile(fileName + ".docx", blob);
+  } catch (err) { toast(err.message || "Algo salió mal"); }
+  finally { busy(btn, false); }
+});
+
+/* ---------- PDF a PowerPoint ---------- */
+$("#ppt-go").addEventListener("click", async e => {
+  if (!needDoc()) return; const btn = e.currentTarget; busy(btn, true);
+  try {
+    await loadScript(LIB.pptx);
+    const scale = +document.querySelector("input[name=pptq]:checked").value;
+    const notes = $("#ppt-notes").checked;
+    const pages = parseRange($("#ppt-range").value, pdf.numPages);
+    if (!pages.length) { toast("Revisa los números de página"); return; }
+    const pres = new window.PptxGenJS();
+    pres.author = APP.author; pres.company = APP.name; pres.title = fileName;
+    let layoutSet = false;
+    for (let i = 0; i < pages.length; i++) {
+      progress("#ppt-prog", i, pages.length);
+      const { cv, wPt, hPt, page } = await renderPage(pages[i], scale);
+      if (!layoutSet) { pres.defineLayout({ name: "FG", width: wPt / 72, height: hPt / 72 }); pres.layout = "FG"; layoutSet = true; }
+      const data = cv.toDataURL("image/jpeg", 0.9).replace(/^data:/, ""); cv.width = cv.height = 0;
+      const slide = pres.addSlide();
+      slide.addImage({ data, x: 0, y: 0, w: wPt / 72, h: hPt / 72 });
+      if (notes) { const t = (await pageText(page)).join("\n"); if (t) slide.addNotes(t); }
+      await sleep(0);
+    }
+    const blob = await pres.write({ outputType: "blob" });
+    progress("#ppt-prog", pages.length, pages.length);
+    saveFile(fileName + ".pptx", blob);
+  } catch (err) { toast(err.message || "Algo salió mal"); }
+  finally { busy(btn, false); }
+});
+
+/* ---------- Firmas guardadas ---------- */
+const KEY = "ferchgam_firmas";
+let memSigs = [];
+function getSigs() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return memSigs; } }
+function setSigs(list) { memSigs = list; try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) { toast("No se pudo guardar en este teléfono; la firma dura hasta cerrar la app."); } }
+
+function sigCard(s, extra) {
+  return `<div class="pv"><img alt="" src="${esc(s.data)}"></div><b>${esc(s.name)}</b>${extra || ""}`;
+}
+function renderSigList() {
+  const list = getSigs(), box = $("#sig-list");
+  if (!list.length) { box.innerHTML = `<div class="empty" style="grid-column:1/-1">Todavía no tienes firmas guardadas.</div>`; return; }
+  box.innerHTML = "";
+  list.forEach(s => {
+    const d = document.createElement("div"); d.className = "sig"; d.style.cursor = "default";
+    d.innerHTML = sigCard(s, `<div class="row"><button class="btn sm ghost" data-a="ren">Renombrar</button><button class="btn sm ghost" data-a="del">Borrar</button></div>`);
+    d.querySelector("[data-a=ren]").addEventListener("click", () => {
+      const b = d.querySelector("b"); const inp = document.createElement("input");
+      inp.className = "txt"; inp.value = s.name; inp.maxLength = 40; b.replaceWith(inp); inp.focus();
+      const done = () => { const v = inp.value.trim() || s.name; setSigs(getSigs().map(x => x.id === s.id ? { ...x, name: v } : x)); renderSigList(); };
+      inp.addEventListener("blur", done); inp.addEventListener("keydown", ev => { if (ev.key === "Enter") inp.blur(); });
+    });
+    d.querySelector("[data-a=del]").addEventListener("click", ev => {
+      const bt = ev.currentTarget;
+      if (bt.dataset.sure) { setSigs(getSigs().filter(x => x.id !== s.id)); placements = placements.filter(p => p.sig !== s.id); renderSigList(); toast("Firma borrada"); }
+      else { bt.dataset.sure = 1; bt.textContent = "¿Seguro? Toca otra vez"; setTimeout(() => { if (bt.isConnected) { delete bt.dataset.sure; bt.textContent = "Borrar"; } }, 3000); }
+    });
+    box.appendChild(d);
+  });
+}
+function nextName() { const n = getSigs().length + 1; return "Firma " + n; }
+
+/* ---------- Pizarra para dibujar la firma ---------- */
+const pad = $("#pad"), pcv = $("#pad-cv"), pctx = pcv.getContext("2d");
+const INKS = [["#1f4fd8", "Azul"], ["#111111", "Negro"], ["#c0281b", "Rojo"], ["#0f7a4b", "Verde"]];
+let ink = INKS[0][0], strokes = [], drawing = null, dpr = 1;
+$("#swatches").innerHTML = INKS.map(([c, n], i) => `<button class="sw${i ? "" : " on"}" style="background:${c}" data-c="${c}" aria-label="Tinta ${n}"></button>`).join("");
+$("#swatches").addEventListener("click", e => { const b = e.target.closest(".sw"); if (!b) return; ink = b.dataset.c; $$(".sw").forEach(x => x.classList.toggle("on", x === b)); });
+function sizePad() {
+  dpr = Math.max(1, window.devicePixelRatio || 1);
+  const r = pad.getBoundingClientRect(); if (!r.width) return;
+  pcv.width = Math.round(r.width * dpr); pcv.height = Math.round(r.height * dpr); redraw();
+}
+function redraw() {
+  pctx.setTransform(1, 0, 0, 1, 0, 0); pctx.clearRect(0, 0, pcv.width, pcv.height);
+  pctx.setTransform(dpr, 0, 0, dpr, 0, 0); pctx.lineCap = "round"; pctx.lineJoin = "round";
+  for (const s of strokes) {
+    pctx.strokeStyle = s.c; pctx.lineWidth = s.w; pctx.beginPath();
+    const p = s.p; pctx.moveTo(p[0].x, p[0].y);
+    if (p.length === 1) pctx.lineTo(p[0].x + 0.1, p[0].y);
+    for (let i = 1; i < p.length - 1; i++) { const mx = (p[i].x + p[i + 1].x) / 2, my = (p[i].y + p[i + 1].y) / 2; pctx.quadraticCurveTo(p[i].x, p[i].y, mx, my); }
+    if (p.length > 1) pctx.lineTo(p[p.length - 1].x, p[p.length - 1].y);
+    pctx.stroke();
+  }
+  pad.querySelector(".hint").style.display = strokes.length ? "none" : "";
+}
+const padPt = e => { const r = pcv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+pcv.addEventListener("pointerdown", e => { e.preventDefault(); pcv.setPointerCapture(e.pointerId); drawing = { c: ink, w: +$("#pad-w").value, p: [padPt(e)] }; strokes.push(drawing); redraw(); });
+pcv.addEventListener("pointermove", e => { if (!drawing) return; drawing.p.push(padPt(e)); redraw(); });
+const endStroke = () => { drawing = null; };
+pcv.addEventListener("pointerup", endStroke); pcv.addEventListener("pointercancel", endStroke);
+$("#pad-undo").addEventListener("click", () => { strokes.pop(); redraw(); });
+$("#pad-clear").addEventListener("click", () => { strokes = []; redraw(); });
+const padRO = new ResizeObserver(sizePad); padRO.observe(pad);
+
+function cropPad() {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const s of strokes) for (const p of s.p) { x0 = Math.min(x0, p.x - s.w); y0 = Math.min(y0, p.y - s.w); x1 = Math.max(x1, p.x + s.w); y1 = Math.max(y1, p.y + s.w); }
+  x0 = Math.max(0, x0 - 4); y0 = Math.max(0, y0 - 4);
+  const w = Math.min(pcv.width / dpr, x1 + 4) - x0, h = Math.min(pcv.height / dpr, y1 + 4) - y0;
+  const out = document.createElement("canvas"); out.width = Math.round(w * dpr); out.height = Math.round(h * dpr);
+  out.getContext("2d").drawImage(pcv, x0 * dpr, y0 * dpr, w * dpr, h * dpr, 0, 0, out.width, out.height);
+  return out;
+}
+function addSig(cv) {
+  const list = getSigs();
+  if (list.length >= 10) { toast("Puedes guardar hasta 10 firmas. Borra una para añadir otra."); return false; }
+  const name = $("#sig-name").value.trim() || nextName();
+  list.push({ id: "s" + Date.now().toString(36), name, data: cv.toDataURL("image/png"), w: cv.width, h: cv.height });
+  setSigs(list); $("#sig-name").value = ""; $("#sig-name").placeholder = nextName();
+  renderSigList(); toast("Firma «" + name + "» guardada"); return true;
+}
+$("#sig-save").addEventListener("click", () => {
+  if (!strokes.length) { toast("Primero dibuja tu firma en el recuadro blanco"); return; }
+  if (addSig(cropPad())) { strokes = []; redraw(); }
+});
+$("#sig-up").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  const img = new Image(); img.src = URL.createObjectURL(f);
+  try { await img.decode(); } catch (err) { toast("No se pudo leer la imagen"); return; }
+  const k = Math.min(1, 900 / img.naturalWidth);
+  const cv = document.createElement("canvas"); cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+  const c = cv.getContext("2d"); c.drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(img.src);
+  const id = c.getImageData(0, 0, cv.width, cv.height), d = id.data;
+  for (let i = 0; i < d.length; i += 4) { const l = 0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]; if (l > 200) d[i + 3] = 0; else if (l > 150) d[i + 3] = Math.round(d[i + 3] * (200 - l) / 50); }
+  c.putImageData(id, 0, 0);
+  addSig(cv);
+});
+
+/* ---------- Agregar firma al PDF ---------- */
+let placements = [], signPage = 1, selSig = null, selPlace = null;
+const sheet = $("#sheet"), scv = $("#sheet-cv");
+function renderSignSigs() {
+  const list = getSigs(), box = $("#sign-sigs");
+  if (!list.length) { box.innerHTML = `<div class="empty" style="grid-column:1/-1">Aún no tienes firmas. <a href="#firmas">Crea tu primera firma</a>.</div>`; selSig = null; return; }
+  if (!list.some(s => s.id === selSig)) selSig = list[0].id;
+  box.innerHTML = "";
+  list.forEach(s => {
+    const b = document.createElement("button"); b.className = "sig" + (s.id === selSig ? " sel" : "");
+    b.setAttribute("aria-pressed", s.id === selSig); b.innerHTML = sigCard(s);
+    b.addEventListener("click", () => { selSig = s.id; renderSignSigs(); toast("Ahora toca la página donde va «" + s.name + "»"); });
+    box.appendChild(b);
+  });
+}
+let renderTok = 0;
+async function drawSheet() {
+  if (!pdf) return;
+  const tok = ++renderTok;
+  const page = await pdf.getPage(signPage);
+  const base = page.getViewport({ scale: 1 });
+  const cssW = Math.min(sheet.parentElement.clientWidth - 24, 640) || 320;
+  const scale = cssW / base.width * Math.min(2, window.devicePixelRatio || 1);
+  const vp = page.getViewport({ scale });
+  const tmp = document.createElement("canvas"); tmp.width = Math.floor(vp.width); tmp.height = Math.floor(vp.height);
+  const ctx = tmp.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, tmp.width, tmp.height);
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  if (tok !== renderTok) return;
+  scv.width = tmp.width; scv.height = tmp.height; scv.getContext("2d").drawImage(tmp, 0, 0);
+  sheet.dataset.ratio = base.height / base.width;
+  $("#pg-lbl").textContent = `Página ${signPage} de ${pdf.numPages}`;
+  $("#pg-prev").disabled = signPage <= 1; $("#pg-next").disabled = signPage >= pdf.numPages;
+  drawPlacements();
+}
+function drawPlacements() {
+  $$(".place").forEach(n => n.remove());
+  const sigs = getSigs(); const ratio = +sheet.dataset.ratio || 1.3;
+  placements.filter(p => p.page === signPage).forEach(p => {
+    const s = sigs.find(x => x.id === p.sig); if (!s) return;
+    const el = document.createElement("div"); el.className = "place" + (p === selPlace ? " on" : "");
+    el.style.left = p.x * 100 + "%"; el.style.top = p.y * 100 + "%"; el.style.width = p.w * 100 + "%";
+    el.innerHTML = `<img alt="Firma ${esc(s.name)}" src="${esc(s.data)}">`;
+    let start = null;
+    el.addEventListener("pointerdown", e => {
+      e.stopPropagation(); el.setPointerCapture(e.pointerId); selPlace = p; syncCtl();
+      $$(".place").forEach(n => n.classList.toggle("on", n === el));
+      start = { x: e.clientX, y: e.clientY, px: p.x, py: p.y };
+    });
+    el.addEventListener("pointermove", e => {
+      if (!start) return; const r = sheet.getBoundingClientRect();
+      const hFrac = p.w * (s.h / s.w) / ratio;
+      p.x = Math.min(1 - p.w, Math.max(0, start.px + (e.clientX - start.x) / r.width));
+      p.y = Math.min(1 - hFrac, Math.max(0, start.py + (e.clientY - start.y) / r.height));
+      el.style.left = p.x * 100 + "%"; el.style.top = p.y * 100 + "%";
+    });
+    const up = () => { start = null; }; el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+    el.addEventListener("click", e => e.stopPropagation());
+    sheet.appendChild(el);
+  });
+  const total = placements.length;
+  $("#place-count").textContent = total ? `Firmas colocadas: ${total} (en ${new Set(placements.map(p => p.page)).size} página/s).` : "Toca la página para colocar la firma elegida.";
+}
+function syncCtl() { $("#place-ctl").hidden = !selPlace; if (selPlace) $("#place-size").value = Math.round(selPlace.w * 100); }
+sheet.addEventListener("click", e => {
+  if (!selSig) { toast("Primero crea o elige una firma"); return; }
+  const s = getSigs().find(x => x.id === selSig); if (!s) return;
+  const r = sheet.getBoundingClientRect(), ratio = +sheet.dataset.ratio || 1.3, w = 0.3;
+  const hFrac = w * (s.h / s.w) / ratio;
+  const x = Math.min(1 - w, Math.max(0, (e.clientX - r.left) / r.width - w / 2));
+  const y = Math.min(1 - hFrac, Math.max(0, (e.clientY - r.top) / r.height - hFrac / 2));
+  selPlace = { page: signPage, sig: selSig, x, y, w }; placements.push(selPlace);
+  syncCtl(); drawPlacements();
+});
+$("#place-size").addEventListener("input", e => {
+  if (!selPlace) return; selPlace.w = +e.target.value / 100; selPlace.x = Math.min(selPlace.x, 1 - selPlace.w); drawPlacements();
+});
+$("#place-del").addEventListener("click", () => { placements = placements.filter(p => p !== selPlace); selPlace = null; syncCtl(); drawPlacements(); });
+$("#pg-prev").addEventListener("click", () => { if (signPage > 1) { signPage--; selPlace = null; syncCtl(); drawSheet(); } });
+$("#pg-next").addEventListener("click", () => { if (pdf && signPage < pdf.numPages) { signPage++; selPlace = null; syncCtl(); drawSheet(); } });
+const sheetRO = new ResizeObserver(() => { if (current === "firmar" && pdf) drawSheet(); });
+sheetRO.observe($(".sheetwrap"));
+
+function showSign() {
+  renderSignSigs();
+  $("#sign-area").hidden = !pdf;
+  if (pdf) { signPage = Math.min(signPage, pdf.numPages); syncCtl(); drawSheet(); }
+}
+$("#sign-go").addEventListener("click", async e => {
+  if (!needDoc()) return;
+  if (!placements.length) { toast("Primero coloca al menos una firma tocando la página"); return; }
+  const btn = e.currentTarget; busy(btn, true); toast("Firmando el documento…");
+  try {
+    await loadScript(LIB.pdflib);
+    const { PDFDocument } = window.PDFLib;
+    const out = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    const sigs = getSigs(), cache = {};
+    for (const p of placements) {
+      const s = sigs.find(x => x.id === p.sig); if (!s) continue;
+      if (!cache[s.id]) cache[s.id] = await out.embedPng(s.data);
+      const page = out.getPage(p.page - 1);
+      let box; try { box = page.getCropBox(); } catch (err) { const z = page.getSize(); box = { x: 0, y: 0, width: z.width, height: z.height }; }
+      const rot = (page.getRotation().angle % 360 + 360) % 360;
+      if (rot !== 0) toast("Aviso: una página está girada; revisa la posición de la firma.");
+      const wPt = p.w * box.width, hPt = wPt * s.h / s.w;
+      page.drawImage(cache[s.id], { x: box.x + p.x * box.width, y: box.y + box.height - p.y * box.height - hPt, width: wPt, height: hPt });
+    }
+    out.setProducer(APP.name + " — " + APP.author);
+    const data = await out.save();
+    saveFile(fileName + "_firmado.pdf", new Blob([data], { type: "application/pdf" }));
+  } catch (err) { toast(err.message || "No se pudo firmar el PDF"); }
+  finally { busy(btn, false); }
+});
+
+/* ---------- Inicio ---------- */
+const ICONS = {
+  png: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg>',
+  word: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M8 11l1.5 6 2.5-5 2.5 5 1.5-6"/></svg>',
+  ppt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/><path d="M8 12V8h3a2 2 0 010 4H8"/></svg>',
+  sign: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19c3-6 5-7 5-4s3-6 5-4 0 5 3 3 3-2 5-1"/><path d="M15 3l4 4-8 8H7v-4z"/></svg>',
+  sigs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M6 15c2-4 3-4 3-2s2-4 3-3 0 3 2 2 2-1 4-1"/><path d="M6 18h12"/></svg>',
+  about: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>'
+};
+const TILES = [
+  ["png", "png", "PDF a PNG", "Convierte cada página en imagen"],
+  ["word", "word", "PDF a Word", "Crea un archivo .docx"],
+  ["powerpoint", "ppt", "PDF a PowerPoint", "Crea diapositivas .pptx"],
+  ["firmar", "sign", "Agregar firma", "Firma tu PDF con tu mano", true],
+  ["firmas", "sigs", "Mis firmas", "Crea, nombra y guarda firmas", true],
+  ["acerca", "about", "Acerca de", "Quién creó esta aplicación"]
+];
+$("#tiles").innerHTML = TILES.map(([h, ic, t, d, alt]) => `<a class="tile${alt ? " alt" : ""}" href="#${h}"><span class="ic">${ICONS[ic]}</span><span><b>${t}</b><span>${d}</span></span></a>`).join("");
+
+/* ---------- Navegación ---------- */
+const VIEWS = ["inicio", "png", "word", "powerpoint", "firmar", "firmas", "acerca"];
+let current = "inicio";
+function route() {
+  const h = location.hash.slice(1); current = VIEWS.includes(h) ? h : "inicio";
+  VIEWS.forEach(v => $("#v-" + v).classList.toggle("on", v === current));
+  $("#back").hidden = current === "inicio";
+  if (current === "firmas") { renderSigList(); $("#sig-name").placeholder = nextName(); requestAnimationFrame(sizePad); }
+  if (current === "firmar") showSign();
+  window.scrollTo(0, 0);
+}
+$("#back").addEventListener("click", () => { location.hash = "inicio"; });
+window.addEventListener("hashchange", route);
+
+/* ---------- Publicidad ---------- */
+if (!ADS.enabled) $("#ad").hidden = true;
+
+renderPickers(); route();
+}
+</script>
+</body>
+</html>

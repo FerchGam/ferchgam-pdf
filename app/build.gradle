@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+}
+
+def buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace 'com.ferchgam.pdf'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.ferchgam.pdf"
+        minSdk 29
+        targetSdk 34
+        versionCode buildNumber
+        versionName "1.0." + buildNumber
+    }
+
+    // Llave SOLO para versiones de prueba. Para Play Store se usará una llave privada guardada como secreto.
+    signingConfigs {
+        prueba {
+            storeFile file('../keystore/test.keystore')
+            storePassword 'ferchgam'
+            keyAlias 'ferchgam'
+            keyPassword 'ferchgam'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.prueba
+        }
+        debug {
+            signingConfig signingConfigs.prueba
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
